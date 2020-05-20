@@ -78,7 +78,7 @@ class ProductApiReaderFactory(schema: StructType, productFilter: Map[String, Str
     }
 
     val brandFilterMap = equalToFilter("brand", key => key,value => value.slug)
-    
+
     val shippingFilterMap = equalToFilter(
       "free_shipping", key => "shipping",
       value => value match {
