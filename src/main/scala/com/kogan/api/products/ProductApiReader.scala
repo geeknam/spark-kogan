@@ -17,20 +17,13 @@ class ProductApiReader(schema: StructType, val productFilter: Map[String, String
 
   val numPartitions = maxItems / DefaultSource.DEFAULT_LIMIT
 
-  private def getOffset(page: Int) = {
-    page match {
-      case 0 => 0
-      case _ => (DefaultSource.DEFAULT_LIMIT * page + 1)
-    }
-  }
-
-  private def getPages(numPartitions: Int) = List.range(0, numPartitions)
+  val apiPages = List.range(0, numPartitions)
 
   override def readSchema(): StructType = schema
 
   override def createDataReaderFactories(): util.List[DataReaderFactory[Row]] = {
     val factoryList = new util.ArrayList[DataReaderFactory[Row]]
-    getPages(numPartitions).foreach(page => {
+    apiPages.foreach(page => {
       // Give each partition an API offset based on the page
       val filter = productFilter ++ Map(
         ProductApiReader.OFFSET_PARAM_KEY -> getOffset(page).toString
@@ -50,6 +43,14 @@ class ProductApiReader(schema: StructType, val productFilter: Map[String, String
   }
 
   var pushedFilters: Array[Filter] = Array[Filter]()
+
+  private def getOffset(page: Int) = {
+    page match {
+      case 0 => 0
+      case _ => (DefaultSource.DEFAULT_LIMIT * page + 1)
+    }
+  }
+
 }
 
 

@@ -56,7 +56,7 @@ class ProductApiReaderFactory(schema: StructType, productFilter: Map[String, Str
     }
   }
 
-  private def updateProductFilter(): Map[String, String] = {
+  private def getPushDowProductFilters(): Map[String, String] = {
     val priceFilter = pushedFilters
       .filter(f => f match {
         case GreaterThan(attribute, _) if(attribute == PRICE_PARAM_KEY) => true
@@ -99,7 +99,7 @@ class ProductApiReaderFactory(schema: StructType, productFilter: Map[String, Str
   }
 
   private def getResponse() = {
-    val params = productFilter ++ updateProductFilter()
+    val params = productFilter ++ getPushDowProductFilters()
     val response = requests.get(
       PRODUCT_API_URL,
       params = params,
