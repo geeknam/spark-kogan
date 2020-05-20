@@ -40,3 +40,14 @@ jobs:
 #        uses: snyk/actions/scala@master
 #        env:
 #          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Publish to Github package
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Publish package
+        run: mvn deploy -Dregistry=https://maven.pkg.github.com/geeknam -Dtoken=GH_TOKEN
