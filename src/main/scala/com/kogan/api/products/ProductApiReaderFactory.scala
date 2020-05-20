@@ -1,7 +1,7 @@
 package com.kogan.api.products
 
 import org.apache.spark.sql.Row
-import org.apache.spark.sql.sources.{EqualTo, Filter, GreaterThan, LessThan}
+import org.apache.spark.sql.sources._
 import org.apache.spark.sql.sources.v2.reader.{DataReader, DataReaderFactory}
 import org.apache.spark.sql.types.StructType
 import com.kogan.api.util.Slug.StringToSlug
@@ -56,31 +56,38 @@ class ProductApiReaderFactory(schema: StructType, productFilter: Map[String, Str
     }
   }
 
-  private def getPushDowProductFilters(): Map[String, String] = {
-    val priceFilter = pushedFilters
+  private def getRangeFilters(key: String) = {
+    pushedFilters
       .filter(f => f match {
-        case GreaterThan(attribute, _) if(attribute == PRICE_PARAM_KEY) => true
-        case LessThan(attribute, _) if(attribute == PRICE_PARAM_KEY) => true
+        case GreaterThan(attribute, _) if(attribute == key) => true
+        case GreaterThanOrEqual(attribute, _) if(attribute == key) => true
+        case LessThan(attribute, _) if(attribute == key) => true
+        case LessThanOrEqual(attribute, _) if(attribute == key) => true
         case _ => false
       })
+  }
 
-    val priceFilterMap = priceFilter.length match {
-      case 0 => Map()
-      case 1 => priceFilter(0) match {
+  private def getPriceFilterMap = {
+    getRangeFilters(PRICE_PARAM_KEY) match {
+      case filters if filters.length == 0 => Map()
+      case filters if filters.length == 1 => filters(0) match {
         case filter: GreaterThan => Map(filter.attribute -> filter.value.toString)
         case filter: LessThan => Map(filter.attribute -> s",${filter.value}")
       }
-      case 2 => (priceFilter(0), priceFilter(1)) match {
+      case filters if filters.length == 0 => (filters(0), filters(1)) match {
         case (first: GreaterThan, second: LessThan) => Map(first.attribute -> s"${first.value},${second.value}")
         case (first: LessThan, second: GreaterThan) => Map(first.attribute -> s"${second.value},${first.value}")
       }
       case _ => Map()
     }
+  }
+
+  private def getPushDowProductFilters(): Map[String, String] = {
 
     val brandFilterMap = equalToFilter("brand", key => key,value => value.slug)
 
     val shippingFilterMap = equalToFilter(
-      "free_shipping", key => "shipping",
+      "free_shipping", _ => "shipping",
       value => value match {
         case "true" => "free"
         case "false" => "not-free"
@@ -88,14 +95,14 @@ class ProductApiReaderFactory(schema: StructType, productFilter: Map[String, Str
     )
 
     val dispatchFilterMap = equalToFilter(
-      "fast_dispatch", key => "dispatch",
+      "fast_dispatch", _ => "dispatch",
       value => value match {
         case "true" => "fast"
         case "false" => "not-fast"
       }
     )
 
-    priceFilterMap ++ brandFilterMap ++ shippingFilterMap ++ dispatchFilterMap
+    getPriceFilterMap ++ brandFilterMap ++ shippingFilterMap ++ dispatchFilterMap
   }
 
   private def getResponse() = {
