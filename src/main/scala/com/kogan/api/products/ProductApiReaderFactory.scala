@@ -22,15 +22,14 @@ class ProductApiReaderFactory(schema: StructType, productFilter: Map[String, Str
 
   var index = 0
 
-  lazy val products = {
-    getResponse().map(
-      row => row.filterKeys(key => fieldNames.contains(key))
-    )
-  }
+  lazy val products = getResponse()
+    .map(row => row.filterKeys(key => fieldNames.contains(key)))
 
   override def next(): Boolean = index < products.length
 
   override def get(): Row = {
+    // Use the order of field names in the schema
+    // and get the Seq of values for products response
     val row = Row.fromSeq(
       fieldNames.map(fn => products(index).get(fn).orNull)
     )
@@ -79,6 +78,7 @@ class ProductApiReaderFactory(schema: StructType, productFilter: Map[String, Str
     }
 
     val brandFilterMap = equalToFilter("brand", key => key,value => value.slug)
+    
     val shippingFilterMap = equalToFilter(
       "free_shipping", key => "shipping",
       value => value match {

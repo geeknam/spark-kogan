@@ -15,6 +15,8 @@ class DefaultSource extends DataSourceV2 with ReadSupportWithSchema {
   }
 
   private def getFilters(options: DataSourceOptions) = {
+    // Allow specifying .option() to filter products
+    // Use default limit=200 in API response
     val defaultFilters = Map(
       "limit" -> DefaultSource.DEFAULT_LIMIT.toString
     )

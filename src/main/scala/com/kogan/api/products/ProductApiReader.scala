@@ -31,10 +31,11 @@ class ProductApiReader(schema: StructType, val productFilter: Map[String, String
   override def createDataReaderFactories(): util.List[DataReaderFactory[Row]] = {
     val factoryList = new util.ArrayList[DataReaderFactory[Row]]
     getPages(numPartitions).foreach(page => {
+      // Give each partition an API offset based on the page
       val filter = productFilter ++ Map(
         ProductApiReader.OFFSET_PARAM_KEY -> getOffset(page).toString
       )
-      
+
       factoryList.add(
         new ProductApiReaderFactory(schema, filter, pushedFilters)
       )
