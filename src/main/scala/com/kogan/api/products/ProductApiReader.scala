@@ -3,10 +3,10 @@ package com.kogan.api.products
 import java.util
 
 import com.kogan.api.products.ProductApiReader.DEFAULT_MAX
-import org.apache.spark.sql.Row
+import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.sources.Filter
 import org.apache.spark.sql.sources.v2.DataSourceOptions
-import org.apache.spark.sql.sources.v2.reader.{DataReaderFactory, DataSourceReader, SupportsPushDownFilters}
+import org.apache.spark.sql.sources.v2.reader.{DataSourceReader, InputPartition, SupportsPushDownFilters}
 import org.apache.spark.sql.types.StructType
 
 class ProductApiReader(schema: StructType, val productFilter: Map[String, String],
@@ -21,8 +21,8 @@ class ProductApiReader(schema: StructType, val productFilter: Map[String, String
 
   override def readSchema(): StructType = schema
 
-  override def createDataReaderFactories(): util.List[DataReaderFactory[Row]] = {
-    val factoryList = new util.ArrayList[DataReaderFactory[Row]]
+  override def planInputPartitions(): util.List[InputPartition[InternalRow]] = {
+    val factoryList = new util.ArrayList[InputPartition[InternalRow]]
     apiPages.foreach(page => {
       // Give each partition an API offset based on the page
       val filter = productFilter ++ Map(
@@ -30,7 +30,7 @@ class ProductApiReader(schema: StructType, val productFilter: Map[String, String
       )
 
       factoryList.add(
-        new ProductApiReaderFactory(schema, filter, pushedFilters)
+        new ProductInputPartition(schema, filter, pushedFilters)
       )
     })
 

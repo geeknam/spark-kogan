@@ -7,7 +7,7 @@ organization := "com.kogan"
 version := sys.env.get("ARTEFACT_VERSION").getOrElse("0.1-SNAPSHOT")
 
 scalaVersion := "2.11.12"
-val sparkVersion = "2.3.0"
+val sparkVersion = "2.4.5"
 
 
 //Publish assembly fat jar

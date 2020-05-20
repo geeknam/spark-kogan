@@ -1,16 +1,22 @@
 package com.kogan.api.products
 
 import org.apache.spark.sql.sources.v2.reader.DataSourceReader
-import org.apache.spark.sql.sources.v2.{DataSourceOptions, DataSourceV2, ReadSupportWithSchema}
+import org.apache.spark.sql.sources.v2.{DataSourceOptions, DataSourceV2, ReadSupport}
 import org.apache.spark.sql.types.StructType
 
-class DefaultSource extends DataSourceV2 with ReadSupportWithSchema {
+class DefaultSource extends DataSourceV2 with ReadSupport {
 
   val ALLOWED_FILTERS = Seq("store", "category", "department", "group_variants")
 
   override def createReader(schema: StructType, options: DataSourceOptions): DataSourceReader = {
     new ProductApiReader(
       schema, getFilters(options), options
+    )
+  }
+
+  override def createReader(options: DataSourceOptions): DataSourceReader = {
+    new ProductApiReader(
+      new StructType(), getFilters(options), options
     )
   }
 
@@ -24,7 +30,6 @@ class DefaultSource extends DataSourceV2 with ReadSupportWithSchema {
       .filter(key => options.get(key).isPresent)
       .map(key => key -> options.get(key).orElse(""))
       .toMap ++ defaultFilters
-
   }
 
 }
