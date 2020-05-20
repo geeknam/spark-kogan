@@ -1,6 +1,6 @@
 ## Spark DataSourceV2 for Kogan.com API
 
-Spark version 2.3.0
+Spark version 2.4.5
 
 ### Usage
 
