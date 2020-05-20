@@ -26,8 +26,7 @@ val df = spark.read
 // - free_shipping
 // - fast_dispatch
 df.filter(
-    "price < 2000 AND brand = 'Apple'" +
-      " AND free_shipping = true AND fast_dispatch = true"
+    "price < 2000 AND brand = 'Apple' AND free_shipping = true AND fast_dispatch = true"
   )
   .show
 
