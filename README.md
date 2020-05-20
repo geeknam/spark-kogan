@@ -1,5 +1,7 @@
 ## Spark DataSourceV2 for Kogan.com API
 
+![Scala CI](https://github.com/geeknam/spark-kogan/workflows/Scala%20CI/badge.svg)
+
 Spark version 2.4.5
 
 ### Usage
