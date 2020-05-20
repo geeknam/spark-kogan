@@ -1,7 +1,7 @@
 package com.kogan.api.util
 
 object Slug {
-  def apply(input:String) = slugify(input)
+  def apply(input:String): String = slugify(input)
 
   def slugify(input: String): String = {
     import java.text.Normalizer
@@ -15,6 +15,6 @@ object Slug {
 
 
   implicit class StringToSlug(s: String) {
-    def slug = Slug(s)
+    def slug: String = Slug(s)
   }
 }
